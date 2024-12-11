@@ -27,25 +27,20 @@ class Led:
         if platform.system() == "Linux":
             GPIO.setup(pin, GPIO.OUT)
 
-    def _blink(self, speed: int):
+    def _blink(self, speed: float):
         self.running = True
-        if speed == 0:
-            wait_seconds = 1
-        else:
-            wait_seconds = 0.5
-        while self.running:
-            print(f"LED an ({self.color})")
+        while True:
             if platform.system() == "Linux":
-                GPIO.output(self.pin, True)
-            time.sleep(wait_seconds)
+                GPIO.output(self.pin, not GPIO.input(self.pin) if self.running else False)
+            print(f"LED {'an' if GPIO.input(self.pin) else 'aus'} ({self.color})")
 
-            print("LED aus")
-            if platform.system() == "Linux":
-                GPIO.output(self.pin, False)
-            time.sleep(wait_seconds)
+            time.sleep(speed)
 
     def blink(self, speed: int):
-        threading.Thread(target=self._blink, args=(speed,)).start()
+       t1 = threading.Thread(target=self._blink, args=(speed,))
+       t1.daemon = True
+       t1.start()
+
 
     def stop(self):
         self.running = False
@@ -54,11 +49,11 @@ class Led:
 
 if __name__ == "__main__":
     GPIOHelper.init()
-
     led = Led("green", 13)
 
-    led.blink(0)
-    time.sleep(5)
+    led.blink(1)
+    time.sleep(4.7)
     led.stop()
 
+    time.sleep(0.1)
     GPIOHelper.cleanup()

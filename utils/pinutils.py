@@ -49,11 +49,18 @@ class Led:
 
 
 async def main():
-    led = Led("green", 13)
+    green = Led("green", 13)
+    red = Led("red", 13)
 
-    led.blink(0)
+    green.blink(0)
     await asyncio.sleep(5)
-    await led.stop()
+    await green.stop()
+    red.blink(1)
+    await asyncio.sleep(5)
+    await red.stop()
+    green.blink(0)
+    await asyncio.sleep(5)
+    await green.stop()
 
     if platform.system() == "Linux":
         GPIO.cleanup()

@@ -3,7 +3,7 @@ import time
 import platform
 
 if platform.system() == "Linux":
-    import RPi.GPIO as GPIO
+    import RPi.GPIO as GPIO  # type: ignore
 
 
 class GPIOHelper:
@@ -29,18 +29,23 @@ class Led:
 
     def _blink(self, speed: float):
         self.running = True
+        pin_value = False
         while True:
             if platform.system() == "Linux":
-                GPIO.output(self.pin, not GPIO.input(self.pin) if self.running else False)
-            print(f"LED {'an' if GPIO.input(self.pin) else 'aus'} ({self.color})")
+                pin_value = not GPIO.input(self.pin) if self.running else False
+                GPIO.output(self.pin, pin_value)
+            else:
+                # fake it
+                pin_value = not pin_value if self.running else False
+
+            print(f"LED {'an' if pin_value else 'aus'} ({self.color})")
 
             time.sleep(speed)
 
     def blink(self, speed: int):
-       t1 = threading.Thread(target=self._blink, args=(speed,))
-       t1.daemon = True
-       t1.start()
-
+        t1 = threading.Thread(target=self._blink, args=(speed,))
+        t1.daemon = True
+        t1.start()
 
     def stop(self):
         self.running = False

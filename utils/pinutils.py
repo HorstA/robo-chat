@@ -6,17 +6,24 @@ if platform.system() == "Linux":
     import RPi.GPIO as GPIO  # type: ignore
 
 
+def only_linux(func):
+    def wrapper(*args, **kwargs):
+        if platform.system() == "Linux":
+            return func(*args, **kwargs)
+
+    return wrapper
+
+
 class GPIOHelper:
     @staticmethod
+    @only_linux
     def init():
-        print(platform.system())
-        if platform.system() == "Linux":
-            GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(GPIO.BCM)
 
     @staticmethod
+    @only_linux
     def cleanup():
-        if platform.system() == "Linux":
-            GPIO.cleanup()
+        GPIO.cleanup()
 
 
 class Led:

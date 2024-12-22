@@ -1,3 +1,4 @@
+import asyncio
 import os
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
@@ -12,7 +13,17 @@ from chains.chat.graph import graph as chat_graph
 from utils import AppSettings
 from loguru import logger
 
+from utils.pinutils import GPIOHelper, Led
+
+from app.globals import bots
+
 settings = AppSettings.AppSettings()
+
+
+async def print_task(s):
+    while True:
+        print("Hello")
+        await asyncio.sleep(s)
 
 
 @asynccontextmanager
@@ -28,9 +39,16 @@ async def lifespan(app: FastAPI):
         rotation="1 MB",
     )
     logger.success(f"Starting server with loglevel: {settings.LOG_LEVEL}")
+
+    GPIOHelper.init()
+    bots.leds = [Led("red"), Led("yellow"), Led("green")]
+
+    # asyncio.create_task(print_task(5))
     yield
 
     ### after the application has finished ###
+    await asyncio.wait(1)
+    GPIOHelper.cleanup()
     logger.success("Server has shut down.")
 
 
@@ -41,18 +59,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.state.test_var = 0
+
 langfuse_handler = CallbackHandler()
 config = None
 # Todo: This method is blocking. It is discouraged to use it in production code.
-try:
-    langfuse_handler.auth_check()
-    logger.success("Verbindung mit Langfuse hergestellt.")
-    config = RunnableConfig(callbacks=[langfuse_handler])
-except Exception as e:
-    logger.error(
-        "Die Authentifizierung mit Langfuse ist fehlgeschlagen. Sind die env-Variablen LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY und LANGFUSE_HOST gesetzt?"
-    )
-    logger.error(e)
+# try:
+#     langfuse_handler.auth_check()
+#     logger.success("Verbindung mit Langfuse hergestellt.")
+#     config = RunnableConfig(callbacks=[langfuse_handler])
+# except Exception as e:
+#     logger.error(
+#         "Die Authentifizierung mit Langfuse ist fehlgeschlagen. Sind die env-Variablen LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY und LANGFUSE_HOST gesetzt?"
+#     )
+#     logger.error(e)
 
 
 @app.get("/")

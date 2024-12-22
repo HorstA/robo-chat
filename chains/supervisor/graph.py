@@ -8,6 +8,14 @@ from utils.aiutils import get_chatmodel
 # this is the agent function that will be called as tool
 # notice that you can pass the state to the tool via InjectedState annotation
 def agent_archive(state: Annotated[dict, InjectedState]):
+    """_summary_
+
+    Args:
+        state (Annotated[dict, InjectedState]): _description_
+
+    Returns:
+        _type_: _description_
+    """
     # you can pass relevant parts of the state to the LLM (e.g., state["messages"])
     # and add any additional logic (different models, custom prompts, structured output, etc.)
     response = rag_graph.invoke(state)
@@ -18,6 +26,14 @@ def agent_archive(state: Annotated[dict, InjectedState]):
 
 
 def agent_2(state: Annotated[dict, InjectedState]):
+    """_summary_
+
+    Args:
+        state (Annotated[dict, InjectedState]): _description_
+
+    Returns:
+        _type_: _description_
+    """
     # response = model.invoke(...)
     return {"generation": "das ist alles nur gefaket"}
 

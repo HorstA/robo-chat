@@ -27,17 +27,28 @@ class GPIOHelper:
 
 
 class Led:
-    def __init__(self, color: str, pin: int):
+    def __init__(self, color: str):
         self.color = color
-        self.pin = pin
+        self._set_pin(color)
         self.running = False
         if platform.system() == "Linux":
-            GPIO.setup(pin, GPIO.OUT)
+            GPIO.setup(self.pin, GPIO.OUT)
+
+    def _set_pin(self, color: str) -> int:
+        match color.lower():
+            case "red":
+                self.pin = 5
+            case "yellow":
+                self.pin = 6
+            case "green":
+                self.pin = 13
+            case _:
+                raise ValueError("falsche Farbe.")
 
     def _blink(self, speed: float):
         self.running = True
         pin_value = False
-        while True:
+        while self.running:
             if platform.system() == "Linux":
                 pin_value = not GPIO.input(self.pin) if self.running else False
                 GPIO.output(self.pin, pin_value)
@@ -48,6 +59,7 @@ class Led:
             print(f"LED {'an' if pin_value else 'aus'} ({self.color})")
 
             time.sleep(speed)
+        print(f"LED blink aus ({self.color})")
 
     def blink(self, speed: int):
         t1 = threading.Thread(target=self._blink, args=(speed,))
@@ -56,16 +68,24 @@ class Led:
 
     def stop(self):
         self.running = False
-        print("Done")
+        if platform.system() == "Linux":
+            GPIO.output(self.pin, False)
 
 
 if __name__ == "__main__":
     GPIOHelper.init()
-    led = Led("green", 13)
+    red_bot = Led("red")
+    yellow_bot = Led("yellow")
+    green_bot = Led("green")
 
-    led.blink(1)
-    time.sleep(4.7)
-    led.stop()
+    red_bot.blink(1)
+    yellow_bot.blink(0.75)
+    green_bot.blink(0.5)
 
-    time.sleep(0.1)
+    time.sleep(15)
+
+    red_bot.stop()
+    yellow_bot.stop()
+    green_bot.stop()
+
     GPIOHelper.cleanup()

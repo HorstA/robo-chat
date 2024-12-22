@@ -35,6 +35,17 @@ poetry shell
 langchain serve
 ```
 
+## Info Pin
+
+<https://pinout.xyz/>
+
+Unbedingt mit sudo aufrufen:
+raspi-gpio get  gibt den Zustand aller GPIO-Pins aus.
+raspi-gpio get X  gibt den Zustand des GPIO-Pins X (GPIO-Pin, nicht Board-Pin) aus.
+raspi-gpio set X op  setzt den GPIO-Pin X als Ausgang.
+raspi-gpio set X dh  setzt den GPIO-Pin X auf High.
+raspi-gpio set X dl  setzt den GPIO-Pin X auf Low.
+
 ## Bugfix
 
 Mega-fieser Bug in Langchain. Ums kurz zu fassen. In den Tiefen der Runnables überschreibt Langchain die Runnabe_Config, so dass wenn du mit LangGraph einen Agent baust und ihn über LangServe bereitstellst, wird plötzlich von LangFuse (ich weiß, viele Langs) nicht mehr mitgeloggt. \

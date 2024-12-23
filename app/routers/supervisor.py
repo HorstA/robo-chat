@@ -1,9 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from langserve import add_routes
 from chains.supervisor.graph import supervisor
 from langfuse.callback import CallbackHandler
 from langchain_core.runnables.config import RunnableConfig
-from utils.pinutils import Led
+from utils.pinutils import FakeBot
 
 from app.globals import bots
 
@@ -16,9 +16,9 @@ router = APIRouter(
 
 config = RunnableConfig(callbacks=[CallbackHandler()])
 
-red_bot = Led("red")
-yellow_bot = Led("yellow")
-green_bot = Led("green")
+red_bot = FakeBot("red")
+yellow_bot = FakeBot("yellow")
+green_bot = FakeBot("green")
 
 
 add_routes(router, supervisor.with_config(config), path="/invoke")
@@ -48,3 +48,8 @@ def stop_bots():
     bots.leds[2].stop()
 
     return {"output": "stopped bots"}
+
+
+@router.get("/get-test_var", name="get-test_var", description="Platzhalter")
+def get_test_var(request: Request):
+    return {"output": request.state.bots.leds[0].pin}

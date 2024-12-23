@@ -1,11 +1,12 @@
-from pydantic import BaseModel
+from utils.pinutils import FakeBot
 
 
-class Bots(BaseModel):
-    leds: list
+class Bots:
+    def __init__(self, leds: list[FakeBot]):
+        self.leds = leds
 
 
-bots = Bots(leds=[])
+bots = Bots([FakeBot("red"), FakeBot("yellow"), FakeBot("green")])
 
 
 def get_bots():

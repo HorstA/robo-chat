@@ -1,5 +1,6 @@
 import asyncio
 import os
+import random
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from langfuse.callback import CallbackHandler
@@ -13,9 +14,9 @@ from chains.chat.graph import graph as chat_graph
 from utils import AppSettings
 from loguru import logger
 
-from utils.pinutils import GPIOHelper, Led
+from utils.pinutils import GPIOHelper, FakeBot
 
-from app.globals import bots
+from app.globals import bots, Bots
 
 settings = AppSettings.AppSettings()
 
@@ -24,6 +25,16 @@ async def print_task(s):
     while True:
         print("Hello")
         await asyncio.sleep(s)
+
+
+async def toggle_fakebots(bots: Bots):
+    while True:
+        for bot in bots.leds:
+            if random.random() < 0.2:
+                stats = [bot.set_offline, bot.set_idle, bot.set_busy]
+                do_something = random.choice(stats)
+                do_something()
+        await asyncio.sleep(10)
 
 
 @asynccontextmanager
@@ -41,13 +52,12 @@ async def lifespan(app: FastAPI):
     logger.success(f"Starting server with loglevel: {settings.LOG_LEVEL}")
 
     GPIOHelper.init()
-    bots.leds = [Led("red"), Led("yellow"), Led("green")]
 
     # asyncio.create_task(print_task(5))
-    yield
+    asyncio.create_task(toggle_fakebots(bots))
+    yield {"bots": bots}
 
     ### after the application has finished ###
-    await asyncio.wait(1)
     GPIOHelper.cleanup()
     logger.success("Server has shut down.")
 
@@ -59,7 +69,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.state.test_var = 0
+# app.state.test_var = 0
 
 langfuse_handler = CallbackHandler()
 config = None

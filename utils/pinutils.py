@@ -37,11 +37,11 @@ class Led:
     def _set_pin(self, color: str) -> int:
         match color.lower():
             case "red":
-                self.pin = 5
+                self.pin = 13
             case "yellow":
                 self.pin = 6
             case "green":
-                self.pin = 13
+                self.pin = 5
             case _:
                 raise ValueError("falsche Farbe.")
 
@@ -56,12 +56,14 @@ class Led:
                 # fake it
                 pin_value = not pin_value if self.running else False
 
-            print(f"LED {'an' if pin_value else 'aus'} ({self.color})")
+            # print(f"LED {'an' if pin_value else 'aus'} ({self.color})")
 
             time.sleep(speed)
         print(f"LED blink aus ({self.color})")
 
     def blink(self, speed: int):
+        if self.running:
+            self.stop()
         t1 = threading.Thread(target=self._blink, args=(speed,))
         t1.daemon = True
         t1.start()
@@ -72,20 +74,44 @@ class Led:
             GPIO.output(self.pin, False)
 
 
+class FakeBot(Led):
+    def set_offline(self):
+        self._status = "offline"
+        self.stop()
+        print(f"Bot {self.color} {self._status}")
+
+    def set_idle(self):
+        self._status = "idle"
+        self.blink(1)
+        print(f"Bot {self.color} {self._status}")
+
+    def set_busy(self):
+        self._status = "busy"
+        self.blink(0.5)
+        print(f"Bot {self.color} {self._status}")
+
+    def get_status(self):
+        return self._status
+
+
 if __name__ == "__main__":
     GPIOHelper.init()
-    red_bot = Led("red")
-    yellow_bot = Led("yellow")
-    green_bot = Led("green")
+    red_bot = FakeBot("red")
+    yellow_bot = FakeBot("yellow")
+    green_bot = FakeBot("green")
 
-    red_bot.blink(1)
-    yellow_bot.blink(0.75)
-    green_bot.blink(0.5)
+    fake_bot = FakeBot("green")
+    fake_bot.set_busy()
 
-    time.sleep(15)
+    # red_bot.blink(1)
+    # yellow_bot.blink(0.75)
+    # green_bot.blink(0.5)
 
-    red_bot.stop()
-    yellow_bot.stop()
-    green_bot.stop()
+    time.sleep(5)
+
+    fake_bot.set_offline()
+    # red_bot.stop()
+    # yellow_bot.stop()
+    # green_bot.stop()
 
     GPIOHelper.cleanup()

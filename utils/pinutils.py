@@ -31,6 +31,7 @@ class Led:
         self.color = color
         self._set_pin(color)
         self.running = False
+        self.sleeping = False
         if platform.system() == "Linux":
             GPIO.setup(self.pin, GPIO.OUT)
 
@@ -57,8 +58,9 @@ class Led:
                 pin_value = not pin_value if self.running else False
 
             # print(f"LED {'an' if pin_value else 'aus'} ({self.color})")
-
+            self.sleeping = True
             time.sleep(speed)
+            self.sleeping = False
         print(f"LED blink aus ({self.color})")
 
     def blink(self, speed: int):
@@ -72,6 +74,8 @@ class Led:
         self.running = False
         if platform.system() == "Linux":
             GPIO.output(self.pin, False)
+        while self.sleeping:
+            time.sleep(0.1)
 
 
 class FakeBot(Led):
@@ -87,7 +91,7 @@ class FakeBot(Led):
 
     def set_busy(self):
         self._status = "busy"
-        self.blink(0.5)
+        self.blink(0.25)
         print(f"Bot {self.color} {self._status}")
 
     def get_status(self):

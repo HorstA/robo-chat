@@ -28,6 +28,16 @@ Viel Spaß
 Mach alles über Poetry, PIP nervt ;-) \
 kopiere die ```.env.example```, erstell dir daraus deine ```.env```
 
+## Raspi Problems
+
+ModuleNotFoundError: No module named 'app':
+export PYTHONPATH=$PWD
+
+pip install RPi.GPIO
+
+ggf für Raspi und poetry:
+export PATH="/home/pi/.local/bin:$PATH"
+
 ## Launch LangServe
 
 ```bash
